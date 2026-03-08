@@ -7,7 +7,7 @@ warnings.filterwarnings('ignore')
 
 
 class ModelValidator:
-    """Stratified K-fold CV for stability; basic checks for imbalance, missing values, constant features, train/val drift."""
+    """Stratified K-fold CV plus sanity checks (imbalance, missing vals, drift)."""
 
     def __init__(self, cv_folds=5, random_state=42):
         self.cv_folds = cv_folds

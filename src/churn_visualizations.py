@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from utils import get_feature_types, save_plot
 
 def analyze_numerical_features(data, numerical_features):
-    """Bar chart of top 10 numerical features by |correlation| with Churn; red=negative, green=positive. Returns full correlation series."""
+    """Bar chart of top 10 numeric features by |correlation| with Churn. Returns correlation series."""
     churn_correlation = data[numerical_features + ['Churn']].corr()['Churn'].sort_values(key=abs, ascending=False)
     top_correlations = churn_correlation.abs().head(10).sort_values(ascending=True)
     top_correlations = churn_correlation[top_correlations.index]
@@ -26,7 +26,7 @@ def analyze_numerical_features(data, numerical_features):
     return churn_correlation
 
 def analyze_categorical_features(data, categorical_features):
-    """Churn rate by category for up to 3 categoricals so the figure doesn’t blow up."""
+    """Churn rate by category (up to 3 features)."""
     churn_rates_by_category = {}
     top_features = categorical_features[:3] if len(categorical_features) > 3 else categorical_features
     

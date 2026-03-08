@@ -6,7 +6,7 @@ from sklearn.metrics import (roc_auc_score, accuracy_score, precision_score,
 from utils import save_plot
 
 class ModelEvaluator:
-    """Computes metrics (AUC-ROC, F1, precision, recall) on train/val/test and picks best model. AUC is primary for imbalanced churn."""
+    """Compute AUC, F1, precision, recall; pick best model. AUC primary for imbalance."""
 
     def __init__(self):
         self.evaluation_results = {}
@@ -58,7 +58,7 @@ class ModelEvaluator:
             self.evaluate_model(model, X_train, y_train, X_val, y_val, X_test, y_test, model_name)
     
     def get_best_model(self, metric='auc_roc', split='test'):
-        """Best model by metric on given split; falls back to val if test scores missing (e.g. Kaggle test has no labels)."""
+        """Best model by metric; falls back to val if test has no labels."""
         if not self.evaluation_results:
             return None, None
         

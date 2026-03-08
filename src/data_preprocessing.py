@@ -6,7 +6,7 @@ from sklearn.impute import SimpleImputer
 from utils import load_data, get_feature_types
 
 class ChurnDataPreprocessor:
-    """Load, clean, encode, and split churn data. Label encoding for categories (GBDT-friendly), median/mode imputation, StandardScaler, 80/20 train/val."""
+    """Load, impute, encode, split. Label encoding, median/mode imputation, StandardScaler, 80/20."""
 
     def __init__(self, test_size=0.2, random_state=42):
         self.test_size = test_size
@@ -58,7 +58,7 @@ class ChurnDataPreprocessor:
         return data
     
     def create_feature_engineering(self, data):
-        # derived rates and flags that might help the model
+        # rates and flags
         if 'MonthlyCharges' in data.columns and 'AccountAge' in data.columns:
             data['TotalChargesPerMonth'] = data['TotalCharges'] / (data['AccountAge'] + 1)  # +1 avoids div by 0 for new accounts
             data['MonthlyChargesRatio'] = data['MonthlyCharges'] / data['TotalChargesPerMonth']
@@ -99,7 +99,7 @@ class ChurnDataPreprocessor:
         return X_train, X_val, X_test
     
     def split_data(self, data, feature_columns):
-        """Train/val from is_train=True (stratified 80/20), test from is_train=False."""
+        """Stratified 80/20 train/val from is_train=True; test from is_train=False."""
         X = data[feature_columns]
         train_mask = data['is_train'] == True
         test_mask = data['is_train'] == False

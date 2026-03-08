@@ -10,7 +10,7 @@ import warnings
 warnings.filterwarnings('ignore')
 
 def _scale_pos_weight(y_train):
-    """Weight for positive class so the model doesn't ignore the minority class."""
+    """Class weight for imbalanced positive class."""
     n_pos = int((y_train == 1).sum())
     n_neg = int((y_train == 0).sum())
     if n_pos == 0:
@@ -19,7 +19,7 @@ def _scale_pos_weight(y_train):
 
 
 def _tune_threshold_for_accuracy(model, X_val, y_val):
-    """Find probability threshold that maximizes validation accuracy (instead of default 0.5)."""
+    """Grid search for threshold that maxes validation accuracy."""
     proba = model.predict_proba(X_val)[:, 1]
     best_acc = 0.0
     best_thresh = 0.5
@@ -33,7 +33,7 @@ def _tune_threshold_for_accuracy(model, X_val, y_val):
 
 
 class GBDTModels:
-    """Trains XGBoost and LightGBM with sensible defaults (subsample, colsample, max_depth). Optional Optuna tuning."""
+    """Train XGBoost and LightGBM. Optional Optuna tuning."""
 
     def __init__(self, random_state=42, n_trials=100, optimize_for_accuracy=False):
         self.random_state = random_state

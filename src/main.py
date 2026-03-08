@@ -18,7 +18,7 @@ from churn_visualizations import analyze_numerical_features, analyze_categorical
 warnings.filterwarnings('ignore')
 
 class ChurnPredictionPipeline:
-    """Runs the full churn pipeline: load → EDA → preprocess → train (XGB/LGB) → evaluate → importance + plots."""
+    """Load data, EDA, preprocess, train XGB/LGB, evaluate, plot importance."""
 
     def __init__(self, data_path="../customer-churn-dataset/", results_path="../results/",
                  sample_size=None):
@@ -42,7 +42,7 @@ class ChurnPredictionPipeline:
         create_results_dir()
         
     def sample_data(self, data, sample_size=None):
-        """Subsample keeping churn/retained balance so small runs still reflect the real ratio."""
+        """Subsample while keeping churn ratio roughly intact."""
         if sample_size is None:
             sample_size = self.sample_size
             
@@ -141,7 +141,7 @@ class ChurnPredictionPipeline:
             if importance_scores is not None:
                 feature_importance = dict(zip(feature_names, importance_scores))
                 top_churn_drivers = dict(sorted(feature_importance.items(), key=lambda x: x[1], reverse=True)[:10])
-                # sanity check: do the model’s top features line up with simple correlation?
+                # compare model importance to correlation
                 if self.churn_correlation is not None:
                     self.compare_with_correlation_analysis(feature_importance, self.churn_correlation)
                 
@@ -182,7 +182,7 @@ class ChurnPredictionPipeline:
         pass  # plots are saved inside the pipeline steps
     
     def make_research_graph(self, feature_importance, feature_names):
-        """Side-by-side: top 10 features that push toward churn vs top 10 that suggest retention."""
+        """Plot top 10 churn predictors vs top 10 retention indicators side by side."""
         import matplotlib.pyplot as plt
         from utils import save_plot
         
@@ -222,7 +222,7 @@ class ChurnPredictionPipeline:
         plt.close()
     
     def compare_with_correlation_analysis(self, feature_importance, churn_correlation):
-        """See how much the model’s top features overlap with simple correlation to Churn."""
+        """Compare model top features to correlation ranking."""
         top_model_features = sorted(feature_importance.items(), key=lambda x: x[1], reverse=True)[:10]
         if 'Churn' in churn_correlation.index:
             corr_without_target = churn_correlation.drop('Churn')

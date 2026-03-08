@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from utils import save_plot
 
 class FeatureImportanceAnalyzer:
-    """Pulls feature_importances_ from the GBDT and plots top-N; used to see what drives churn vs retention."""
+    """Extract feature_importances_ from GBDT and plot top N."""
 
     def __init__(self):
         self.feature_importance_results = {}

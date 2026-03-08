@@ -1,4 +1,4 @@
-# Customer Churn Prediction 
+# Customer Churn Prediction
 
 Predicting whether a subscription customer will churn or stay, and which features matter most for that prediction.
 
@@ -45,4 +45,4 @@ You can also pass `--sample-size 5000` for a smaller run, or turn on Optuna with
 
 **Reproducibility:** Random seed 42 for splits and Optuna. Default is the 10K subset; use `--use-full-dataset` for the numbers you’d report.
 
-**Credits:** Dataset from Kaggle (title above). Code in `src/` is original for this project; no copied snippets beyond normal library use. For grading, repo access is granted to lorenzo.destefani@gmail.com per course instructions.
+**Credits:** Dataset from Kaggle (title above). Code in `src/` is original for this project; no copied snippets beyond normal library use. 

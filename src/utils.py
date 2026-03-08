@@ -68,7 +68,7 @@ def print_data_info(df, name="Dataset"):
         print("No missing values found")
 
 def get_feature_types(df):
-    """Split columns into numerical, categorical, binary, or target (Churn). Skips CustomerID."""
+    """Return dict of numerical, categorical, binary, target. Skips CustomerID."""
     feature_types = {
         'numerical': [],
         'categorical': [],
