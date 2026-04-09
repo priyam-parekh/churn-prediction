@@ -2,7 +2,7 @@
 
 Predicting whether a subscription customer will churn or stay, and which features matter most for that prediction.
 
-I chose this because it ties CS to something practical—for subscription businesses, losing customers directly hurts growth, and spotting who might leave early gives a chance to intervene. Churn isn’t driven by one thing; it’s billing, usage, support, demographics, etc. So the goal isn’t only to build a classifier but to see which levers actually move the needle.
+For subscription businesses, losing customers directly hurts growth, and spotting who might leave early gives a chance to intervene. Churn isn’t driven by one thing; it’s billing, usage, support, demographics, etc. So the goal isn’t only to build a classifier but to see which levers actually move the needle.
 
 **What the pipeline does:** Binary classification (Churn = 1 left, Churn = 0 stayed). I use gradient boosted trees—XGBoost and LightGBM—since they handle mixed feature types and give interpretable importance scores. Outputs are evaluation metrics (AUC-ROC, F1, etc.) and plots in `results/`.
 
