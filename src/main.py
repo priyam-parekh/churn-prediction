@@ -10,6 +10,7 @@ sys.path.append(str(Path(__file__).parent))
 from data_preprocessing import ChurnDataPreprocessor
 from gbdt_models import GBDTModels
 from model_evaluation import ModelEvaluator
+from artifacts import save_serving_bundle
 from feature_importance import FeatureImportanceAnalyzer
 from model_validation import ModelValidator
 from utils import create_results_dir, get_feature_types, plots_enabled, set_save_plots
@@ -21,7 +22,7 @@ class ChurnPredictionPipeline:
     """Load data, EDA, preprocess, train XGB/LGB, evaluate, plot importance."""
 
     def __init__(self, data_path="../customer-churn-dataset/", results_path="../results/",
-                 sample_size=None):
+                 sample_size=None, save_artifacts=True, artifacts_subdir="serving"):
         # paths resolved relative to this file so it works from repo root or src/
         src_dir = Path(__file__).parent
         if isinstance(data_path, str):
@@ -38,7 +39,9 @@ class ChurnPredictionPipeline:
         self.models = {}
         self.evaluation_results = {}
         self.churn_correlation = None
-        
+        self.save_artifacts = save_artifacts
+        self.artifacts_subdir = artifacts_subdir
+
         create_results_dir()
         
     def sample_data(self, data, sample_size=None):
@@ -91,9 +94,9 @@ class ChurnPredictionPipeline:
             combined_data = pd.concat([train_data, test_data], ignore_index=True)
             
             preprocessor.analyze_features(combined_data)
-            combined_data = preprocessor.handle_missing_values(combined_data)
+            combined_data = preprocessor.handle_missing_values(combined_data, fit_imputers=True)
             combined_data = preprocessor.encode_categorical_features(combined_data, fit_encoders=True)
-            combined_data = preprocessor.create_feature_engineering(combined_data)
+            combined_data = preprocessor.create_feature_engineering(combined_data, fit_stats=True)
             
             feature_columns = preprocessor.select_features(combined_data)
             X_train, X_val, X_test, y_train, y_val, y_test = preprocessor.split_data(combined_data, feature_columns)
@@ -153,7 +156,16 @@ class ChurnPredictionPipeline:
                     )
             
             self.print_summary(best_model_name, best_model_score, top_churn_drivers, optimize_for_accuracy=optimize_for_accuracy)
-            self.save_results(None, gbdt_trainer, evaluator, importance_analyzer)
+            self.save_results(
+                preprocessor,
+                gbdt_trainer,
+                evaluator,
+                importance_analyzer,
+                best_model_name,
+                X_train,
+                y_train,
+                optimize_for_accuracy=optimize_for_accuracy,
+            )
             
         except Exception as e:
             print(f"\nError: {str(e)}")
@@ -178,8 +190,40 @@ class ChurnPredictionPipeline:
                 acc_str = f" | Acc: {val_acc:.2%}" if val_acc is not None else ""
                 print(f"  {model_name:<20} AUC: {val_auc:.4f} | F1: {val_f1:.4f}{acc_str}")
     
-    def save_results(self, baseline_trainer, gbdt_trainer, evaluator, importance_analyzer):
-        pass  # plots are saved inside the pipeline steps
+    def save_results(
+        self,
+        preprocessor,
+        gbdt_trainer,
+        evaluator,
+        importance_analyzer,
+        best_model_name,
+        X_train,
+        y_train,
+        optimize_for_accuracy=False,
+    ):
+        if not self.save_artifacts:
+            return
+        primary_metric = "accuracy" if optimize_for_accuracy else "auc_roc"
+        er = evaluator.evaluation_results.get(best_model_name, {})
+        split_name = "test"
+        pv = er.get("test", {}).get(primary_metric)
+        if pv is None:
+            split_name = "val"
+            pv = er.get("val", {}).get(primary_metric)
+
+        out_dir = Path(self.results_path) / self.artifacts_subdir
+        path = save_serving_bundle(
+            preprocessor,
+            self.models[best_model_name],
+            best_model_name,
+            X_train,
+            y_train,
+            out_dir,
+            primary_metric=primary_metric,
+            primary_metric_value=float(pv) if pv is not None else None,
+            split_for_metric=split_name,
+        )
+        print(f"\nServing artifacts written to: {path}")
     
     def make_research_graph(self, feature_importance, feature_names):
         """Plot top 10 churn predictors vs top 10 retention indicators side by side."""
@@ -249,6 +293,8 @@ def main():
     parser.add_argument("--optimize-hyperparameters", action="store_true", help="Enable Optuna hyperparameter tuning")
     parser.add_argument("--n-trials", type=int, default=5, help="Number of Optuna trials (if optimization enabled)")
     parser.add_argument("--optimize-for-accuracy", action="store_true", help="Tune for accuracy (class weights + threshold); default is AUC")
+    parser.add_argument("--no-save-artifacts", action="store_true", help="Skip writing serving bundle (model, preprocessor, SHAP background)")
+    parser.add_argument("--artifacts-subdir", type=str, default="serving", help="Subdirectory under results/ for serving artifacts")
     args = parser.parse_args()
 
     if args.sample_size is not None:
@@ -260,7 +306,11 @@ def main():
 
     set_save_plots(True)
 
-    pipeline = ChurnPredictionPipeline(sample_size=sample_size)
+    pipeline = ChurnPredictionPipeline(
+        sample_size=sample_size,
+        save_artifacts=not args.no_save_artifacts,
+        artifacts_subdir=args.artifacts_subdir,
+    )
     pipeline.run_complete_analysis(
         optimize_hyperparameters=args.optimize_hyperparameters,
         n_trials=args.n_trials,

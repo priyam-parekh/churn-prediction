@@ -1,0 +1,23 @@
+{
+  "required_columns": [
+    "AccountAge",
+    "AverageViewingDuration",
+    "ContentDownloadsPerMonth",
+    "ContentType",
+    "DeviceRegistered",
+    "Gender",
+    "GenrePreference",
+    "MonthlyCharges",
+    "MultiDeviceAccess",
+    "PaperlessBilling",
+    "ParentalControl",
+    "PaymentMethod",
+    "SubscriptionType",
+    "SubtitlesEnabled",
+    "SupportTicketsPerMonth",
+    "TotalCharges",
+    "UserRating",
+    "ViewingHoursPerWeek",
+    "WatchlistSize"
+  ]
+}

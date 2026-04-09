@@ -45,4 +45,20 @@ You can also pass `--sample-size 5000` for a smaller run, or turn on Optuna with
 
 **Reproducibility:** Random seed 42 for splits and Optuna. Default is the 10K subset; use `--use-full-dataset` for the numbers you’d report.
 
+**Serving (FastAPI + Streamlit):** After training, the pipeline writes a bundle under `results/serving/` (disable with `--no-save-artifacts`). Start the API from the repo root:
+
+```bash
+PYTHONPATH=src uvicorn api.app:app --host 127.0.0.1 --port 8000
+```
+
+Optional: `CHURN_ARTIFACTS_DIR=path/to/bundle` if artifacts are not in `results/serving/`.
+
+In another terminal, launch the dashboard (calls the API over HTTP; it does not load the model locally):
+
+```bash
+streamlit run streamlit_app.py
+```
+
+Set `FASTAPI_URL` (default `http://127.0.0.1:8000`) if the API runs elsewhere. The UI loads `GET /schema` and `POST /predict` with optional SHAP contributions.
+
 **Credits:** Dataset from Kaggle (title above). Code in `src/` is original for this project; no copied snippets beyond normal library use. 

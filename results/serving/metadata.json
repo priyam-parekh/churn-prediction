@@ -1,0 +1,14 @@
+{
+  "best_model_name": "LightGBM",
+  "primary_metric": "auc_roc",
+  "primary_metric_split": "val",
+  "primary_metric_value": 0.7491645864790271,
+  "best_threshold": 0.79,
+  "background_size": 256,
+  "background_requested": 256,
+  "versions": {
+    "sklearn": "1.5.1",
+    "xgboost": "3.0.5",
+    "lightgbm": "4.6.0"
+  }
+}
